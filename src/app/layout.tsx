@@ -5,6 +5,8 @@ import {
   DM_Sans,
   Space_Mono,
 } from 'next/font/google'
+import Script from 'next/script'
+import { ThemeProvider } from '@/components/ThemeProvider'
 import './globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -50,17 +52,22 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body
         className={`
           ${cormorant.variable}
           ${syne.variable}
           ${dmSans.variable}
           ${spaceMono.variable}
-          bg-[#080808] text-[#f0ebe3] antialiased
+          bg-[var(--bg)] text-[var(--text)] antialiased
         `}
       >
-        {children}
+        {/* Runs before React hydration — prevents flash of wrong theme */}
+        <Script src="/theme-init.js" strategy="beforeInteractive" />
+
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )

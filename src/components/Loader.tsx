@@ -34,7 +34,7 @@ export default function Loader({ onComplete }: LoaderProps) {
     <AnimatePresence>
       {!done && (
         <motion.div
-          className="fixed inset-0 z-[9999] bg-[#080808] flex flex-col items-center justify-center"
+          className="fixed inset-0 z-[9999] bg-[var(--bg)] flex flex-col items-center justify-center"
           exit={{ opacity: 0 }}
           transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
         >

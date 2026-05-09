@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Design Tokens ─────────────────────────────────────── */
+/* ─── Design Tokens — Dark (default) ────────────────────── */
 :root {
   --bg:          #080808;
   --surface:     #111111;
@@ -15,6 +15,21 @@
   --accent:      #c4a25a;
   --accent-dim:  rgba(196, 162, 90, 0.1);
   --accent-glow: rgba(196, 162, 90, 0.25);
+}
+
+/* ─── Design Tokens — Light ──────────────────────────────── */
+html.light {
+  --bg:          #f5f0e8;
+  --surface:     #ede8de;
+  --surface-2:   #e4ddd2;
+  --border:      rgba(0, 0, 0, 0.075);
+  --border-warm: rgba(154, 120, 64, 0.22);
+  --text:        #1c1814;
+  --muted:       #6b6055;
+  --muted-2:     #c0b8ae;
+  --accent:      #9a7840;
+  --accent-dim:  rgba(154, 120, 64, 0.1);
+  --accent-glow: rgba(154, 120, 64, 0.2);
 }
 
 /* ─── Base Reset ─────────────────────────────────────────── */
@@ -90,12 +105,52 @@ body::after {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);
 }
+html.light .glass {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(0, 0, 0, 0.075);
+}
 
 .glass-warm {
   background: rgba(196, 162, 90, 0.04);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-warm);
+}
+html.light .glass-warm {
+  background: rgba(154, 120, 64, 0.07);
+  border-color: rgba(154, 120, 64, 0.22);
+}
+
+/* ─── Hero gradient overlay ──────────────────────────────── */
+.hero-overlay {
+  background: linear-gradient(
+    102deg,
+    #080808 28%,
+    rgba(8, 8, 8, 0.82) 52%,
+    transparent 75%
+  );
+}
+html.light .hero-overlay {
+  background: linear-gradient(
+    102deg,
+    #f5f0e8 28%,
+    rgba(245, 240, 232, 0.82) 52%,
+    transparent 75%
+  );
+}
+
+/* ─── Smooth theme transition ────────────────────────────── */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition:
+    background-color 0.45s ease,
+    border-color     0.35s ease,
+    color            0.35s ease,
+    fill             0.35s ease,
+    stroke           0.35s ease !important;
+  transition-delay: 0ms !important;
 }
 
 /* ─── Section Layout ─────────────────────────────────────── */

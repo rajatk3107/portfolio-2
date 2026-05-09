@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
+import { useTheme } from '@/components/ThemeProvider'
 
 const Scene3D = dynamic(() => import('@/components/Scene3D'), {
   ssr: false,
@@ -25,12 +26,8 @@ function NameReveal() {
             letterSpacing: '-0.02em',
           }}
           initial={{ y: '105%', opacity: 0 }}
-          animate={{ y: '0%', opacity: 1 }}
-          transition={{
-            duration: 1.1,
-            delay: 0.5 + i * 0.08,
-            ease: [0.22, 1, 0.36, 1],
-          }}
+          animate={{ y: '0%',   opacity: 1 }}
+          transition={{ duration: 1.1, delay: 0.5 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
         >
           {char}
         </motion.span>
@@ -49,7 +46,6 @@ function ScrollIndicator() {
       animate={{ opacity: 1 }}
       transition={{ delay: 2.2, duration: 0.8 }}
     >
-      {/* Mouse outline */}
       <div className="w-5 h-8 rounded-full border border-[var(--muted)] flex items-start justify-center p-1.5">
         <motion.div
           className="w-0.5 h-2 bg-[var(--accent)] rounded-full"
@@ -70,7 +66,8 @@ function ScrollIndicator() {
 // ─── Hero Section ─────────────────────────────────────────────
 
 export default function Hero() {
-  const mouse = useRef({ x: 0, y: 0 })
+  const mouse     = useRef({ x: 0, y: 0 })
+  const { theme } = useTheme()
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -84,13 +81,11 @@ export default function Hero() {
   }, [])
 
   return (
-    <section
-      id="hero"
-      className="relative w-full h-screen overflow-hidden"
-    >
+    <section id="hero" className="relative w-full h-screen overflow-hidden">
+
       {/* ── 3D Canvas — full screen background ── */}
       <div className="absolute inset-0">
-        <Scene3D mouse={mouse} />
+        <Scene3D mouse={mouse} theme={theme} />
       </div>
 
       {/* ── Radial ambient glow ── */}
@@ -98,26 +93,21 @@ export default function Hero() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse 60% 70% at 70% 50%, rgba(196,162,90,0.04) 0%, transparent 70%)',
+            'radial-gradient(ellipse 60% 70% at 70% 50%, rgba(196,162,90,0.05) 0%, transparent 70%)',
         }}
       />
 
-      {/* ── Left-side content fade ── */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            'linear-gradient(100deg, #080808 28%, rgba(8,8,8,0.82) 52%, transparent 75%)',
-        }}
-      />
+      {/* ── Left-side content fade — theme-aware CSS class ── */}
+      <div className="absolute inset-0 pointer-events-none hero-overlay" />
 
       {/* ── Content ── */}
       <div className="relative z-10 h-full flex flex-col justify-center px-8 md:px-16 lg:px-24 max-w-4xl">
+
         {/* Badge */}
         <motion.div
           className="flex items-center gap-3 mb-8"
           initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
+          animate={{ opacity: 1, x: 0  }}
           transition={{ delay: 0.3, duration: 0.8 }}
         >
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -129,7 +119,7 @@ export default function Hero() {
         {/* Name */}
         <NameReveal />
 
-        {/* Sub-name line */}
+        {/* Sub-name */}
         <motion.div
           className="overflow-hidden mt-1"
           initial={{ opacity: 0 }}
@@ -138,11 +128,7 @@ export default function Hero() {
         >
           <span
             className="font-display italic font-light"
-            style={{
-              fontSize: 'clamp(2rem, 5.5vw, 5rem)',
-              color: 'var(--muted)',
-              letterSpacing: '-0.01em',
-            }}
+            style={{ fontSize: 'clamp(2rem, 5.5vw, 5rem)', color: 'var(--muted)', letterSpacing: '-0.01em' }}
           >
             Kumar
           </span>
@@ -152,30 +138,29 @@ export default function Hero() {
         <motion.p
           className="font-body text-base md:text-lg text-[var(--muted)] max-w-md mt-8 leading-relaxed"
           initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0  }}
           transition={{ delay: 1.4, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
         >
           Full-stack developer crafting precision digital
           experiences — where engineering meets craft.
         </motion.p>
 
-        {/* CTA Buttons */}
+        {/* CTAs */}
         <motion.div
           className="flex flex-wrap gap-4 mt-10"
           initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0  }}
           transition={{ delay: 1.65, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
         >
           <a
             href="#projects"
-            className="group relative px-8 py-4 bg-[var(--accent)] text-[#080808]
+            className="px-8 py-4 bg-[var(--accent)] text-[var(--bg)]
                        font-heading font-semibold text-sm tracking-wide
-                       hover:bg-[#dfc07a] transition-colors duration-300 overflow-hidden"
+                       hover:opacity-90 transition-opacity duration-300"
             data-hover
           >
-            <span className="relative z-10">View Work</span>
+            View Work
           </a>
-
           <a
             href="#contact"
             className="group px-8 py-4 border border-[var(--border)]
@@ -189,7 +174,7 @@ export default function Hero() {
           </a>
         </motion.div>
 
-        {/* Metrics strip */}
+        {/* Metrics */}
         <motion.div
           className="flex gap-8 mt-14 pt-8 border-t border-[var(--border)]"
           initial={{ opacity: 0 }}
@@ -197,9 +182,9 @@ export default function Hero() {
           transition={{ delay: 2.0, duration: 0.8 }}
         >
           {[
-            { n: '5+',  l: 'Years' },
+            { n: '5+',  l: 'Years'    },
             { n: '50+', l: 'Projects' },
-            { n: '20+', l: 'Clients' },
+            { n: '20+', l: 'Clients'  },
           ].map(({ n, l }) => (
             <div key={l}>
               <div className="font-display text-2xl md:text-3xl text-[var(--text)]">{n}</div>
