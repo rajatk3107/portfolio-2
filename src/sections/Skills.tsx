@@ -3,6 +3,40 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 
+// ─── Word-by-word heading reveal ─────────────────────────────
+
+function SplitHeading({ lines }: { lines: Array<{ text: string; muted?: boolean }> }) {
+  const ref    = useRef(null)
+  const inView = useInView(ref, { once: true, margin: '-60px' })
+  let wordIndex = 0
+
+  return (
+    <div ref={ref} className="font-display font-medium leading-[1.1]"
+         style={{ fontSize: 'clamp(2.4rem, 4.5vw, 3.8rem)', color: 'var(--text)' }}>
+      {lines.map((line, li) => (
+        <div key={li} className={`flex flex-wrap gap-x-[0.28em] ${line.muted ? 'italic font-light' : ''}`}
+             style={{ color: line.muted ? 'var(--muted)' : 'var(--text)' }}>
+          {line.text.split(' ').map((word) => {
+            const wi = wordIndex++
+            return (
+              <div key={wi} className="overflow-hidden">
+                <motion.span
+                  className="block"
+                  initial={{ y: '110%' }}
+                  animate={inView ? { y: '0%' } : {}}
+                  transition={{ duration: 0.75, delay: wi * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {word}
+                </motion.span>
+              </div>
+            )
+          })}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ─── Data ─────────────────────────────────────────────────────
 
 const categories = [
@@ -165,15 +199,10 @@ export default function Skills() {
 
         {/* Heading */}
         <div className="grid lg:grid-cols-2 gap-6 mb-20 items-end">
-          <Reveal>
-            <h2
-              className="font-display font-medium leading-[1.1]"
-              style={{ fontSize: 'clamp(2.4rem, 4.5vw, 3.8rem)', color: 'var(--text)' }}
-            >
-              Tools of the<br />
-              <em className="italic font-light text-[var(--muted)]">trade.</em>
-            </h2>
-          </Reveal>
+          <SplitHeading lines={[
+            { text: 'Tools of the' },
+            { text: 'trade.', muted: true },
+          ]} />
           <Reveal delay={0.12}>
             <p className="font-body text-[var(--muted)] text-base leading-relaxed max-w-md lg:ml-auto">
               Five years of building across the full stack — from pixel-perfect UIs to

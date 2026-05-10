@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 
-import Loader        from '@/components/Loader'
-import Navigation    from '@/components/Navigation'
-import CustomCursor  from '@/components/CustomCursor'
+import Loader         from '@/components/Loader'
+import Navigation     from '@/components/Navigation'
+import CustomCursor   from '@/components/CustomCursor'
+import ScrollProgress from '@/components/ScrollProgress'
 import About         from '@/sections/About'
 import Skills        from '@/sections/Skills'
 import Experience    from '@/sections/Experience'
@@ -48,6 +49,7 @@ export default function Page() {
   return (
     <>
       <CustomCursor />
+      <ScrollProgress />
 
       {loading && <Loader onComplete={() => setLoading(false)} />}
 

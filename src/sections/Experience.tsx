@@ -1,7 +1,41 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { motion, useInView, useMotionValue, useSpring, useTransform } from 'framer-motion'
+
+// ─── Word-by-word heading reveal ─────────────────────────────
+
+function SplitHeading({ lines }: { lines: Array<{ text: string; muted?: boolean }> }) {
+  const ref    = useRef(null)
+  const inView = useInView(ref, { once: true, margin: '-60px' })
+  let wordIndex = 0
+
+  return (
+    <div ref={ref} className="font-display font-medium leading-[1.08] mb-1"
+         style={{ fontSize: 'clamp(2.4rem, 4.5vw, 3.8rem)', color: 'var(--text)' }}>
+      {lines.map((line, li) => (
+        <div key={li} className={`flex flex-wrap gap-x-[0.28em] ${line.muted ? 'italic font-light' : ''}`}
+             style={{ color: line.muted ? 'var(--muted)' : 'var(--text)' }}>
+          {line.text.split(' ').map((word) => {
+            const wi = wordIndex++
+            return (
+              <div key={wi} className="overflow-hidden">
+                <motion.span
+                  className="block"
+                  initial={{ y: '110%' }}
+                  animate={inView ? { y: '0%' } : {}}
+                  transition={{ duration: 0.75, delay: wi * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {word}
+                </motion.span>
+              </div>
+            )
+          })}
+        </div>
+      ))}
+    </div>
+  )
+}
 
 // ─── Data ─────────────────────────────────────────────────────
 
@@ -260,17 +294,43 @@ function ExperienceCard({ exp, index }: { exp: typeof experiences[0]; index: num
   const [hovered, setHovered] = useState(false)
   const isEven = index % 2 === 0
 
+  // 3D tilt
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+  const rotateYRaw = useTransform(mouseX, [-0.5, 0.5], [-7, 7])
+  const rotateXRaw = useTransform(mouseY, [-0.5, 0.5], [5, -5])
+  const rotateX = useSpring(rotateXRaw, { stiffness: 260, damping: 28 })
+  const rotateY = useSpring(rotateYRaw, { stiffness: 260, damping: 28 })
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5)
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5)
+  }
+
+  const handleMouseLeave = () => {
+    mouseX.set(0)
+    mouseY.set(0)
+    setHovered(false)
+  }
+
   return (
+    <div style={{ perspective: '1400px' }} onMouseMove={handleMouseMove}>
     <motion.article
       ref={ref}
       className="grid lg:grid-cols-2 overflow-hidden rounded-2xl glass
                  transition-all duration-700"
-      style={{ borderColor: hovered ? exp.accent + '40' : undefined }}
+      style={{
+        borderColor: hovered ? exp.accent + '40' : undefined,
+        rotateX,
+        rotateY,
+        transformStyle: 'preserve-3d',
+      }}
       initial={{ opacity: 0, y: 44 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 1, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
       onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseLeave={handleMouseLeave}
     >
       {/* ── Visual pane ── */}
       <div
@@ -376,6 +436,7 @@ function ExperienceCard({ exp, index }: { exp: typeof experiences[0]; index: num
         </div>
       </div>
     </motion.article>
+    </div>
   )
 }
 
@@ -403,16 +464,12 @@ export default function Experience() {
 
         {/* Heading */}
         <div className="grid lg:grid-cols-2 gap-6 mb-20 items-end">
-          <motion.h2
-            className="font-display font-medium leading-[1.08]"
-            style={{ fontSize: 'clamp(2.4rem, 4.5vw, 3.8rem)', color: 'var(--text)' }}
-            initial={{ opacity: 0, y: 24 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.9, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          >
-            Where I've<br />
-            <em className="italic font-light text-[var(--muted)]">built my craft.</em>
-          </motion.h2>
+          <div>
+            <SplitHeading lines={[
+              { text: "Where I've" },
+              { text: 'built my craft.', muted: true },
+            ]} />
+          </div>
           <motion.p
             className="font-body text-[var(--muted)] text-base leading-relaxed max-w-md lg:ml-auto"
             initial={{ opacity: 0, y: 24 }}

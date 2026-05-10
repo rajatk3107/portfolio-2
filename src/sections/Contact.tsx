@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { motion, useInView, AnimatePresence } from 'framer-motion'
+import { motion, useInView, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
 
 // ─── Floating label input ─────────────────────────────────────
 
@@ -96,6 +96,80 @@ function SocialLink({ href, label, handle }: { href: string; label: string; hand
         ↗
       </motion.span>
     </a>
+  )
+}
+
+// ─── Magnetic submit button ───────────────────────────────────
+
+function MagneticSubmitButton({ status }: { status: 'idle' | 'sending' | 'sent' }) {
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const springX = useSpring(x, { stiffness: 220, damping: 18 })
+  const springY = useSpring(y, { stiffness: 220, damping: 18 })
+
+  const handleMove = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (status !== 'idle') return
+    const rect = e.currentTarget.getBoundingClientRect()
+    x.set((e.clientX - rect.left - rect.width  / 2) * 0.32)
+    y.set((e.clientY - rect.top  - rect.height / 2) * 0.32)
+  }
+
+  const handleLeave = () => { x.set(0); y.set(0) }
+
+  return (
+    <motion.button
+      type="submit"
+      disabled={status !== 'idle'}
+      className="relative mt-2 overflow-hidden group px-8 py-5
+                 bg-[var(--accent)] text-[#080808] font-heading font-semibold text-sm
+                 tracking-wide disabled:opacity-70 transition-opacity duration-300"
+      style={{ x: springX, y: springY }}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+      whileTap={{ scale: status === 'idle' ? 0.97 : 1 }}
+      data-hover
+    >
+      <AnimatePresence mode="wait">
+        {status === 'idle' && (
+          <motion.span
+            key="idle"
+            className="flex items-center justify-center gap-2"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{   opacity: 0, y: -8 }}
+          >
+            Send message
+            <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
+          </motion.span>
+        )}
+        {status === 'sending' && (
+          <motion.span
+            key="sending"
+            className="flex items-center justify-center gap-2"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{   opacity: 0, y: -8 }}
+          >
+            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+            </svg>
+            Sending…
+          </motion.span>
+        )}
+        {status === 'sent' && (
+          <motion.span
+            key="sent"
+            className="flex items-center justify-center gap-2"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{   opacity: 0, y: -8 }}
+          >
+            ✓ Message sent — I'll reply soon
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </motion.button>
   )
 }
 
@@ -207,57 +281,7 @@ export default function Contact() {
                 onChange={v => setForm(f => ({ ...f, message: v }))}
               />
 
-              <motion.button
-                type="submit"
-                disabled={status !== 'idle'}
-                className="relative mt-2 overflow-hidden group px-8 py-5
-                           bg-[var(--accent)] text-[#080808] font-heading font-semibold text-sm
-                           tracking-wide disabled:opacity-70 transition-opacity duration-300"
-                whileHover={{ scale: status === 'idle' ? 1.01 : 1 }}
-                whileTap={{  scale: 0.99 }}
-                data-hover
-              >
-                <AnimatePresence mode="wait">
-                  {status === 'idle' && (
-                    <motion.span
-                      key="idle"
-                      className="flex items-center justify-center gap-2"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{   opacity: 0, y: -8 }}
-                    >
-                      Send message
-                      <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
-                    </motion.span>
-                  )}
-                  {status === 'sending' && (
-                    <motion.span
-                      key="sending"
-                      className="flex items-center justify-center gap-2"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{   opacity: 0, y: -8 }}
-                    >
-                      <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                      </svg>
-                      Sending…
-                    </motion.span>
-                  )}
-                  {status === 'sent' && (
-                    <motion.span
-                      key="sent"
-                      className="flex items-center justify-center gap-2"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{   opacity: 0, y: -8 }}
-                    >
-                      ✓ Message sent — I'll reply soon
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.button>
+              <MagneticSubmitButton status={status} />
 
               <p className="font-mono text-[10px] text-[var(--muted)] tracking-wide text-center">
                 Or email directly at{' '}

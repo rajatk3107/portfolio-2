@@ -1,14 +1,34 @@
 'use client'
 
-import { useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { useEffect, useRef } from 'react'
+import { motion, useInView, useMotionValue, animate } from 'framer-motion'
+
+// ─── Scroll-triggered animated counter ───────────────────────
+
+function Counter({ to, suffix = '' }: { to: number; suffix: string }) {
+  const ref    = useRef<HTMLSpanElement>(null)
+  const inView = useInView(ref as React.RefObject<Element>, { once: true })
+  const count  = useMotionValue(0)
+
+  useEffect(() => {
+    if (!inView) return
+    const ctrl = animate(count, to, {
+      duration: 1.8,
+      ease: [0.22, 1, 0.36, 1],
+      onUpdate: v => { if (ref.current) ref.current.textContent = `${Math.round(v)}${suffix}` },
+    })
+    return ctrl.stop
+  }, [inView, to, suffix, count])
+
+  return <span ref={ref}>0{suffix}</span>
+}
 
 // ─── Reveal wrapper ───────────────────────────────────────────
 
 function Reveal({ children, delay = 0, className = '' }: {
   children: React.ReactNode; delay?: number; className?: string
 }) {
-  const ref = useRef(null)
+  const ref    = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
   return (
     <motion.div
@@ -23,28 +43,74 @@ function Reveal({ children, delay = 0, className = '' }: {
   )
 }
 
-// ─── Floating stat card ───────────────────────────────────────
+// ─── Word-by-word heading reveal ─────────────────────────────
 
-function StatCard({ value, label, note }: { value: string; label: string; note?: string }) {
+function SplitHeading({ lines }: { lines: Array<{ text: string; muted?: boolean }> }) {
+  const ref    = useRef(null)
+  const inView = useInView(ref, { once: true, margin: '-60px' })
+  let wordIndex = 0
+
   return (
-    <div className="glass rounded-xl px-5 py-4 flex flex-col gap-1 hover:border-[var(--border-warm)] transition-colors duration-500">
-      <span className="font-display text-4xl text-[var(--text)] leading-none">{value}</span>
-      <span className="font-mono text-[10px] text-[var(--muted)] tracking-[0.2em] uppercase">{label}</span>
-      {note && <span className="font-body text-xs text-[var(--muted)] mt-1">{note}</span>}
+    <div ref={ref} className="font-display font-medium leading-[1.08] mb-8"
+         style={{ fontSize: 'clamp(2.4rem, 4.5vw, 4rem)', color: 'var(--text)' }}>
+      {lines.map((line, li) => (
+        <div key={li} className={`flex flex-wrap gap-x-[0.3em] ${line.muted ? 'italic font-light' : ''}`}
+             style={{ color: line.muted ? 'var(--muted)' : 'var(--text)' }}>
+          {line.text.split(' ').map((word) => {
+            const wi = wordIndex++
+            return (
+              <div key={wi} className="overflow-hidden">
+                <motion.span
+                  className="block"
+                  initial={{ y: '110%' }}
+                  animate={inView ? { y: '0%' } : {}}
+                  transition={{ duration: 0.75, delay: wi * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {word}
+                </motion.span>
+              </div>
+            )
+          })}
+        </div>
+      ))}
     </div>
+  )
+}
+
+// ─── Animated stat card ───────────────────────────────────────
+
+function StatCard({ to, suffix, label }: { to: number; suffix: string; label: string }) {
+  return (
+    <motion.div
+      className="glass rounded-xl px-5 py-4 flex flex-col gap-1
+                 hover:border-[var(--border-warm)] transition-colors duration-500"
+      whileHover={{ y: -4, transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } }}
+    >
+      <span className="font-display text-4xl text-[var(--text)] leading-none">
+        <Counter to={to} suffix={suffix} />
+      </span>
+      <span className="font-mono text-[10px] text-[var(--muted)] tracking-[0.2em] uppercase">{label}</span>
+    </motion.div>
   )
 }
 
 // ─── About Section ────────────────────────────────────────────
 
+const stats = [
+  { to: 5,  suffix: '+',  label: 'Years exp.'    },
+  { to: 4,  suffix: '',   label: 'Companies'     },
+  { to: 3,  suffix: 'M+', label: 'Users reached' },
+]
+
 export default function About() {
   const sectionRef = useRef(null)
-  const inView = useInView(sectionRef, { once: true, margin: '-120px' })
+  const inView     = useInView(sectionRef, { once: true, margin: '-120px' })
 
   return (
     <section id="about" ref={sectionRef} className="section-pad">
       <div className="max-w-7xl mx-auto">
-        {/* ── Section label ── */}
+
+        {/* Section label */}
         <Reveal className="mb-16">
           <div className="flex items-center gap-4">
             <span className="font-mono text-[10px] text-[var(--accent)] tracking-[0.3em]">01</span>
@@ -55,26 +121,19 @@ export default function About() {
 
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
 
-          {/* ── LEFT — story ── */}
+          {/* ── LEFT ── */}
           <div>
-            {/* Oversized section number */}
-            <div
-              className="font-display text-[10rem] leading-none select-none pointer-events-none
-                         absolute -translate-y-16 -translate-x-4 opacity-[0.025]"
-            >
+            <div className="font-display text-[10rem] leading-none select-none pointer-events-none
+                            absolute -translate-y-16 -translate-x-4 opacity-[0.025]">
               01
             </div>
 
-            <Reveal delay={0.1}>
-              <h2
-                className="font-display font-medium leading-[1.08] mb-8"
-                style={{ fontSize: 'clamp(2.4rem, 4.5vw, 4rem)', color: 'var(--text)' }}
-              >
-                Building digital<br />
-                <em className="italic font-light text-[var(--muted)]">experiences that</em><br />
-                leave an impression.
-              </h2>
-            </Reveal>
+            {/* Word-by-word heading */}
+            <SplitHeading lines={[
+              { text: 'Building digital' },
+              { text: 'experiences that', muted: true },
+              { text: 'leave an impression.' },
+            ]} />
 
             <Reveal delay={0.2}>
               <p className="font-body text-[var(--muted)] text-base leading-relaxed max-w-lg">
@@ -92,23 +151,21 @@ export default function About() {
               </p>
             </Reveal>
 
-            {/* Stats */}
+            {/* Animated stat cards */}
             <Reveal delay={0.38} className="grid grid-cols-3 gap-4 mt-12">
-              <StatCard value="5+"  label="Years exp." />
-              <StatCard value="4"   label="Companies" />
-              <StatCard value="3M+" label="Users reached" />
+              {stats.map(s => <StatCard key={s.label} {...s} />)}
             </Reveal>
           </div>
 
-          {/* ── RIGHT — visual card ── */}
+          {/* ── RIGHT — glass card ── */}
           <Reveal delay={0.15} className="relative lg:mt-8">
-
-            {/* Main glass card */}
-            <div
+            <motion.div
               className="glass rounded-2xl p-8 relative overflow-hidden"
               style={{ minHeight: '440px' }}
+              whileHover={{ boxShadow: '0 0 0 1px var(--border-warm)' }}
+              transition={{ duration: 0.4 }}
             >
-              {/* Subtle grid pattern */}
+              {/* Grid pattern */}
               <div
                 className="absolute inset-0 opacity-[0.04] pointer-events-none"
                 style={{
@@ -117,53 +174,40 @@ export default function About() {
                   backgroundSize: '40px 40px',
                 }}
               />
-
               {/* Ambient glow */}
-              <div
-                className="absolute -top-20 -right-20 w-60 h-60 rounded-full pointer-events-none"
-                style={{
-                  background: 'radial-gradient(circle, rgba(196,162,90,0.08) 0%, transparent 70%)',
-                }}
-              />
-
-              {/* Large ambient initial */}
-              <div
-                className="absolute bottom-4 right-6 font-display italic font-bold select-none pointer-events-none"
-                style={{ fontSize: '9rem', color: 'rgba(196,162,90,0.06)', lineHeight: 1 }}
-              >
+              <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full pointer-events-none"
+                   style={{ background: 'radial-gradient(circle, rgba(196,162,90,0.08) 0%, transparent 70%)' }} />
+              {/* Large RK */}
+              <div className="absolute bottom-4 right-6 font-display italic font-bold select-none pointer-events-none"
+                   style={{ fontSize: '9rem', color: 'rgba(196,162,90,0.06)', lineHeight: 1 }}>
                 RK
               </div>
 
-              {/* Content */}
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-10">
                   <div>
-                    <div className="font-mono text-[10px] text-[var(--muted)] tracking-widest uppercase mb-2">
-                      Currently
-                    </div>
-                    <div className="font-heading font-semibold text-[var(--text)] text-lg">
-                      Senior Frontend Engineer
-                    </div>
-                    <div className="font-body text-[var(--muted)] text-sm mt-0.5">
-                      @ Vercel — San Francisco, CA
-                    </div>
+                    <div className="font-mono text-[10px] text-[var(--muted)] tracking-widest uppercase mb-2">Currently</div>
+                    <div className="font-heading font-semibold text-[var(--text)] text-lg">Senior Frontend Engineer</div>
+                    <div className="font-body text-[var(--muted)] text-sm mt-0.5">@ Vercel — San Francisco, CA</div>
                   </div>
                   <div className="glass-warm rounded-lg px-3 py-1.5">
                     <span className="font-mono text-[10px] text-[var(--accent)] tracking-widest">OPEN</span>
                   </div>
                 </div>
 
-                {/* Info rows */}
                 {[
-                  { label: 'Location',    value: 'India 🇮🇳',           sub: 'Available remotely' },
-                  { label: 'Focus',       value: 'Web & Mobile Apps',    sub: 'Full-stack' },
-                  { label: 'Education',   value: 'B.Tech Computer Sci.', sub: 'IIT Graduate' },
+                  { label: 'Location',    value: 'India 🇮🇳',            sub: 'Available remotely' },
+                  { label: 'Focus',       value: 'Web & Mobile Apps',     sub: 'Full-stack' },
+                  { label: 'Education',   value: 'B.Tech Computer Sci.',  sub: 'IIT Graduate' },
                   { label: 'Side quests', value: 'Open source • Writing', sub: '12k GitHub stars' },
-                ].map(row => (
-                  <div
+                ].map((row, i) => (
+                  <motion.div
                     key={row.label}
-                    className="flex items-start justify-between py-4 border-t border-[var(--border)]
-                               hover:border-[var(--border-warm)] transition-colors duration-300"
+                    className="flex items-start justify-between py-4 border-t border-[var(--border)]"
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={inView ? { opacity: 1, x: 0 } : {}}
+                    transition={{ duration: 0.5, delay: 0.5 + i * 0.07 }}
+                    whileHover={{ borderColor: 'var(--border-warm)', transition: { duration: 0.2 } }}
                   >
                     <span className="font-mono text-[10px] text-[var(--muted)] tracking-widest uppercase w-28 shrink-0 pt-0.5">
                       {row.label}
@@ -172,23 +216,19 @@ export default function About() {
                       <div className="font-body text-[var(--text)] text-sm">{row.value}</div>
                       <div className="font-mono text-[10px] text-[var(--muted)] tracking-wide mt-0.5">{row.sub}</div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
-            {/* Floating accent chip — top-right offset */}
+            {/* Floating chips */}
             <motion.div
               className="absolute -top-4 -right-4 glass-warm rounded-xl px-4 py-3 z-10"
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <div className="font-mono text-[10px] text-[var(--accent)] tracking-widest uppercase">
-                ✦ Available
-              </div>
+              <div className="font-mono text-[10px] text-[var(--accent)] tracking-widest uppercase">✦ Available</div>
             </motion.div>
-
-            {/* Floating bottom-left chip */}
             <motion.div
               className="absolute -bottom-4 -left-4 glass rounded-xl px-4 py-3 z-10"
               animate={{ y: [0, 6, 0] }}
