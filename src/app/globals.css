@@ -15,6 +15,7 @@
   --accent:      #c4a25a;
   --accent-dim:  rgba(196, 162, 90, 0.1);
   --accent-glow: rgba(196, 162, 90, 0.25);
+  --nav-link:    rgba(240, 235, 227, 0.58);
 }
 
 /* ─── Design Tokens — Light ──────────────────────────────── */
@@ -30,6 +31,7 @@ html.light {
   --accent:      #9a7840;
   --accent-dim:  rgba(154, 120, 64, 0.1);
   --accent-glow: rgba(154, 120, 64, 0.2);
+  --nav-link:    rgba(28, 24, 20, 0.62);
 }
 
 /* ─── Base Reset ─────────────────────────────────────────── */

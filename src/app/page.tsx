@@ -8,7 +8,6 @@ import Navigation    from '@/components/Navigation'
 import CustomCursor  from '@/components/CustomCursor'
 import About         from '@/sections/About'
 import Skills        from '@/sections/Skills'
-import Projects      from '@/sections/Projects'
 import Experience    from '@/sections/Experience'
 import Contact       from '@/sections/Contact'
 
@@ -58,7 +57,6 @@ export default function Page() {
           <Hero />
           <About />
           <Skills />
-          <Projects />
           <Experience />
           <Contact />
         </main>

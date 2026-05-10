@@ -5,10 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from './ThemeProvider'
 
 const links = [
-  { label: 'Work',       href: '#projects'   },
+  { label: 'Experience', href: '#experience' },
   { label: 'About',      href: '#about'      },
   { label: 'Skills',     href: '#skills'     },
-  { label: 'Experience', href: '#experience' },
+  { label: 'Contact',    href: '#contact'    },
 ]
 
 // ─── Sun / Moon icons ─────────────────────────────────────────
@@ -116,8 +116,9 @@ export default function Navigation() {
             <motion.a
               key={link.label}
               href={link.href}
-              className="font-mono text-[10px] text-[var(--muted)] tracking-[0.2em] uppercase
+              className="font-mono text-[10px] tracking-[0.2em] uppercase
                          hover:text-[var(--text)] transition-colors duration-300 relative group"
+              style={{ color: 'var(--nav-link)' }}
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0  }}
               transition={{ delay: 0.9 + i * 0.08, duration: 0.6 }}

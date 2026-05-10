@@ -129,7 +129,7 @@ export default function Contact() {
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
         >
-          <span className="font-mono text-[10px] text-[var(--accent)] tracking-[0.3em]">05</span>
+          <span className="font-mono text-[10px] text-[var(--accent)] tracking-[0.3em]">04</span>
           <div className="w-10 h-px bg-[var(--accent)]" />
           <span className="font-mono text-[10px] text-[var(--muted)] tracking-[0.25em] uppercase">Contact</span>
         </motion.div>

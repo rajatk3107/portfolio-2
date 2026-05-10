@@ -95,8 +95,8 @@ export default function About() {
             {/* Stats */}
             <Reveal delay={0.38} className="grid grid-cols-3 gap-4 mt-12">
               <StatCard value="5+"  label="Years exp." />
-              <StatCard value="50+" label="Projects" />
-              <StatCard value="20+" label="Clients" />
+              <StatCard value="4"   label="Companies" />
+              <StatCard value="3M+" label="Users reached" />
             </Reveal>
           </div>
 

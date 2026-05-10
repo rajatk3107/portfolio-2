@@ -153,13 +153,13 @@ export default function Hero() {
           transition={{ delay: 1.65, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
         >
           <a
-            href="#projects"
+            href="#experience"
             className="px-8 py-4 bg-[var(--accent)] text-[var(--bg)]
                        font-heading font-semibold text-sm tracking-wide
                        hover:opacity-90 transition-opacity duration-300"
             data-hover
           >
-            View Work
+            View Experience
           </a>
           <a
             href="#contact"
@@ -182,9 +182,9 @@ export default function Hero() {
           transition={{ delay: 2.0, duration: 0.8 }}
         >
           {[
-            { n: '5+',  l: 'Years'    },
-            { n: '50+', l: 'Projects' },
-            { n: '20+', l: 'Clients'  },
+            { n: '5+', l: 'Years'    },
+            { n: '4',  l: 'Companies' },
+            { n: '3M+', l: 'Users Reached' },
           ].map(({ n, l }) => (
             <div key={l}>
               <div className="font-display text-2xl md:text-3xl text-[var(--text)]">{n}</div>
